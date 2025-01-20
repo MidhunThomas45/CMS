@@ -19,21 +19,28 @@ class Salary(models.Model):
     salary_payment_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
 
+# Gender Model
+class Gender(models.Model):
+    name = models.CharField(max_length=10, unique=True)  # Example: 'Male', 'Female', 'Other'
 
-# Abstract User for Staff
+    def __str__(self):
+        return self.name
+
+# Staff Model
 class Staff(AbstractUser):
-    gender = models.CharField(max_length=10)
-    age = models.IntegerField()
-    mobile_number = models.CharField(max_length=15, unique=True)
-    joining_date = models.DateField()
-    qualification = models.CharField(max_length=100)
+    gender = models.ForeignKey('Gender', on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_gender')
+    dob = models.DateTimeField(null=True, blank=True)
+    mobile_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    joining_date = models.DateField(null=True, blank=True)
+    qualification = models.CharField(max_length=100, null=True, blank=True)
     photo = models.ImageField(upload_to='staff_photos/', null=True, blank=True) 
-    department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='staff_department')
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='staff_department', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    salary = models.ForeignKey('Salary', on_delete=models.CASCADE, related_name='staff_salary')
+    salary = models.ForeignKey('Salary', on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    
 # Specialization Table
 class Specialization(models.Model):
     specialization_name = models.CharField(max_length=50, unique=True)
