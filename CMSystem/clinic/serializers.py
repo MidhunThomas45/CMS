@@ -16,18 +16,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     #validations
-    def validate_mobile_number(self, value):
-        validate_mobile_number(value)
-        return value
-
-    def validate_dob(self, value):
-        validate_dob(value)
-        return value
-
-    def validate_joining_date(self, value):
-        validate_joining_date(value)
-        return value
-
     def validate(self, data):
         username = data.get('username')
         password = data.get('password')
