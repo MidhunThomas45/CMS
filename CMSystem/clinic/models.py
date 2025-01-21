@@ -39,7 +39,6 @@ class Staff(AbstractUser):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     
 # Specialization Table
 class Specialization(models.Model):
@@ -101,11 +100,18 @@ class Token(models.Model):
     issued_at = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=True)
 
+# Medicine Type
+class MedicineType(models.Model):
+    type_name = models.CharField(max_length=15)
+
+    def __str__(self):
+        return self.type_name
+
 # Medicine Table
 class Medicine(models.Model):
     name = models.CharField(max_length=50)
     dose = models.CharField(max_length=50)
-    type = models.CharField(max_length=50)
+    type = models.ForeignKey(MedicineType, on_delete=models.CASCADE, related_name='medicine_type')
 
     def __str__(self):
         return self.name
@@ -144,3 +150,4 @@ class Bill(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
