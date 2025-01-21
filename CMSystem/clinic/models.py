@@ -11,6 +11,7 @@ class Department(models.Model):
     
 # Salary Table
 class Salary(models.Model):
+    staff = models.ForeignKey('Staff', on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
     base_salary = models.DecimalField(max_digits=10, decimal_places=2)
     deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -36,7 +37,6 @@ class Staff(AbstractUser):
     photo = models.ImageField(upload_to='staff_photos/', null=True, blank=True) 
     department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='staff_department', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    salary = models.ForeignKey('Salary', on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -54,6 +54,9 @@ class Doctor(models.Model):
     specialization = models.ForeignKey('Specialization', on_delete=models.CASCADE, related_name='doctors')
     consultation_fee = models.DecimalField(max_digits=10, decimal_places=2)
     year_of_experience = models.IntegerField()
+
+    def __str__(self):
+        return f"Dr. {self.staff.first_name} {self.staff.last_name}"  # Display staff name
     
 # Receptionist Table
 class Receptionist(models.Model):
@@ -76,7 +79,7 @@ class Schedule(models.Model):
 class Patient(models.Model):
     full_name = models.CharField(max_length=100)
     dob = models.DateField()
-    gender = models.CharField(max_length=10)
+    gender = models.ForeignKey('Gender', on_delete=models.CASCADE, related_name='patients')
     mobile_number = models.CharField(max_length=15, unique=True)
     address = models.CharField(max_length=255)
 
