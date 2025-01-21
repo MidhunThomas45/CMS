@@ -7,12 +7,26 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import Group
 from .models import Staff
+from .validators import validate_mobile_number, validate_dob, validate_joining_date
 
 
 # Login Serializer
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
+    #validations
+    def validate_mobile_number(self, value):
+        validate_mobile_number(value)
+        return value
+
+    def validate_dob(self, value):
+        validate_dob(value)
+        return value
+
+    def validate_joining_date(self, value):
+        validate_joining_date(value)
+        return value
 
     def validate(self, data):
         username = data.get('username')
@@ -44,15 +58,20 @@ class LoginSerializer(serializers.Serializer):
 
 # Signup Serializer
 class SignupSerializer(serializers.ModelSerializer):
-    #password = serializers.CharField(write_only=True, required=False)
     group = serializers.IntegerField(write_only=True)
     class Meta:
         model = Staff
-        fields = ['email', 'mobile_number', 'gender', 'dob', 
+        fields = ['first_name', 'last_name', 'email', 'mobile_number', 'gender', 'dob', 
                   'joining_date', 'qualification', 'photo', 'department', 'group']
         extra_kwargs = {
             'email': {'required': True},
             'mobile_number': {'required': True},
+            'dob': {'required': True},
+            'gender': {'required': True},
+            'qualification': {'required': True},
+            'department': {'required': True},
+            'first_name': { 'required': True},
+            'last_name': { 'required': True}
         }
 
     def validate_group(self, value):
@@ -61,6 +80,14 @@ class SignupSerializer(serializers.ModelSerializer):
         except Group.DoesNotExist:
             raise serializers.ValidationError(f"Group with ID {value} does not exist.")
         return group
+    
+    def validate(self, data):
+        """Object-level validation."""
+        # Call validators from validators.py
+        validate_mobile_number(data.get('mobile_number'))
+        validate_dob(data.get('dob'))
+        validate_joining_date(data.get('joining_date'))
+        return data
     
     def generate_username(self, email, mobile_number):
         # Extract the part of the email before '@'
@@ -87,6 +114,7 @@ class SignupSerializer(serializers.ModelSerializer):
         staff = Staff.objects.create(username=username, **validated_data)
         staff.set_password(password)
         staff.save()
+        
         # Assign the user to the group
         group.user_set.add(staff)
         # Return the generated username and password
