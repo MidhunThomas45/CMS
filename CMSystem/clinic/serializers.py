@@ -1,9 +1,15 @@
+import random
+import string
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import Group
+from .models import Staff
 
+
+# Login Serializer
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -35,3 +41,4 @@ class LoginSerializer(serializers.Serializer):
                 "email": user.email,
             }
         }
+    
