@@ -1,1 +1,4 @@
 /myvenv
+settings.py
+__pycache__/
+**/migrations/
