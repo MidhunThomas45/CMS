@@ -1,9 +1,15 @@
+import random
+import string
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import Group
+from .models import Staff
 
+
+# Login Serializer
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -35,3 +41,60 @@ class LoginSerializer(serializers.Serializer):
                 "email": user.email,
             }
         }
+
+# Signup Serializer
+class SignupSerializer(serializers.ModelSerializer):
+    #password = serializers.CharField(write_only=True, required=False)
+    group = serializers.IntegerField(write_only=True)
+    class Meta:
+        model = Staff
+        fields = ['email', 'mobile_number', 'gender', 'dob', 
+                  'joining_date', 'qualification', 'photo', 'department', 'group']
+        extra_kwargs = {
+            'email': {'required': True},
+            'mobile_number': {'required': True},
+        }
+
+    def validate_group(self, value):
+        try:
+            group = Group.objects.get(id=value)
+        except Group.DoesNotExist:
+            raise serializers.ValidationError(f"Group with ID {value} does not exist.")
+        return group
+    
+    def generate_username(self, email, mobile_number):
+        # Extract the part of the email before '@'
+        email_prefix = email.split('@')[0]
+        # Get the last three digits of the mobile number
+        mobile_suffix = mobile_number[-3:]
+        return (email_prefix + mobile_suffix).lower()
+    
+    def generate_password(self):
+        # Generate a random password with letters, digits, and symbols
+        characters = string.ascii_letters + string.digits + string.punctuation
+        return ''.join(random.choices(characters, k=8))
+    
+    def create(self, validated_data):
+        group = validated_data.pop('group')  # Get the group object
+        email = validated_data['email']
+        mobile_number = validated_data['mobile_number']
+
+        # Generate username and password
+        username = self.generate_username(email, mobile_number)
+        password = self.generate_password()
+
+        # Create the staff user
+        staff = Staff.objects.create(username=username, **validated_data)
+        staff.set_password(password)
+        staff.save()
+        # Assign the user to the group
+        group.user_set.add(staff)
+        # Return the generated username and password
+        staff.generated_password = password  # Attach it temporarily to return it in response
+        return staff
+    
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['username'] = instance.username
+        rep['password'] = getattr(instance, 'generated_password', None)  # Add generated password to response
+        return rep 
