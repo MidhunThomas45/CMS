@@ -85,8 +85,8 @@ from .models import Doctor
 class DoctorViewSet(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
-    # authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # Schedule
 from .serializers import ScheduleSerializer

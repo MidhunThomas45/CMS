@@ -89,6 +89,7 @@ class Patient(models.Model):
 class Appointment(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='appointments')
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='schedules', null=True, blank=True)
     appointment_date = models.DateField()
     is_pre_booked = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -150,4 +151,3 @@ class Bill(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-

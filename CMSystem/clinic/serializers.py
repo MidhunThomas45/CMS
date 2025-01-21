@@ -151,7 +151,7 @@ from .models import Appointment
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = ['id', 'patient', 'doctor', 'appointment_date', 'is_pre_booked', 'is_active']
+        fields = '__all__'
 
 # Specialization Serializer
 from .models import Specialization
