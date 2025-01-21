@@ -7,7 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import Group
 from .models import Staff
-from .validators import validate_mobile_number, validate_dob, validate_joining_date
+from .validators import validate_mobile_number
 
 
 # Login Serializer
@@ -61,7 +61,7 @@ class SignupSerializer(serializers.ModelSerializer):
     group = serializers.IntegerField(write_only=True)
     class Meta:
         model = Staff
-        fields = ['first_name', 'last_name', 'email', 'mobile_number', 'gender', 'dob', 
+        fields = ['id','first_name', 'last_name', 'email', 'mobile_number', 'gender', 'dob', 
                   'joining_date', 'qualification', 'photo', 'department', 'group']
         extra_kwargs = {
             'email': {'required': True},
@@ -71,8 +71,14 @@ class SignupSerializer(serializers.ModelSerializer):
             'qualification': {'required': True},
             'department': {'required': True},
             'first_name': { 'required': True},
-            'last_name': { 'required': True}
+            'last_name': { 'required': True},
+            'joining_date': {'required': True}
         }
+
+    def validate_email(self, value):
+        if Staff.objects.filter(email=value).exists():
+            raise serializers.ValidationError("user with this email already exists.")
+        return value
 
     def validate_group(self, value):
         try:
@@ -82,11 +88,10 @@ class SignupSerializer(serializers.ModelSerializer):
         return group
     
     def validate(self, data):
-        """Object-level validation."""
         # Call validators from validators.py
         validate_mobile_number(data.get('mobile_number'))
-        validate_dob(data.get('dob'))
-        validate_joining_date(data.get('joining_date'))
+        # validate_dob(data.get('dob'))
+        # validate_joining_date(data.get('joining_date'))
         return data
     
     def generate_username(self, email, mobile_number):
@@ -113,6 +118,7 @@ class SignupSerializer(serializers.ModelSerializer):
         # Create the staff user
         staff = Staff.objects.create(username=username, **validated_data)
         staff.set_password(password)
+        print(password)
         staff.save()
         
         # Assign the user to the group
@@ -126,3 +132,79 @@ class SignupSerializer(serializers.ModelSerializer):
         rep['username'] = instance.username
         rep['password'] = getattr(instance, 'generated_password', None)  # Add generated password to response
         return rep 
+
+# Staff Serializer
+class StaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Staff
+        fields = '__all__'
+
+# Patient Serializer
+from .models import Patient
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = ['id', 'full_name', 'dob', 'gender', 'mobile_number', 'address']
+
+# Appointment Serializer
+from .models import Appointment
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['id', 'patient', 'doctor', 'appointment_date', 'is_pre_booked', 'is_active']
+
+# Specialization Serializer
+from .models import Specialization
+class SpecializationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specialization
+        fields = ['id', 'specialization_name']
+
+# Doctor Serializer
+from .models import Doctor
+class DoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = ['id', 'staff', 'specialization', 'consultation_fee', 'year_of_experience']
+
+# Schedule Serializer
+from .models import Schedule
+class ScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Schedule
+        fields = ['id', 'doctor', 'schedule_date', 'time_slot', 'token', 'status']
+
+# TIme Slot Serializer
+from .models import TimeSlot
+class TimeSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeSlot
+        fields = ['id', 'start_time', 'end_time']
+
+# Token Serializer
+from .models import Token
+class TokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Token
+        fields = ['id', 'appointment', 'token_number', 'issued_at', 'status']
+
+# Consultation
+from .models import Consultation
+class ConsultationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Consultation
+        fields = ['id', 'token', 'patient', 'symptoms', 'diagnosis', 'notes', 'additional_notes', 'created_at', 'prescription', 'is_active']
+
+# Medical Records
+from .models import MedicalRecord
+class MedicalRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicalRecord
+        fields = ['id', 'patient', 'doctors', 'record_date', 'consultation', 'updated_at']
+
+# Bill
+from .models import Bill
+class BillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bill
+        fields = ['id', 'appointment', 'total_amount', 'payment_status', 'created_at']

@@ -22,12 +22,12 @@ def validate_mobile_number(value):
     if len(value) > 10:
         raise ValidationError("Mobile number cannot exceed 10 digits.")
 
-# DOB
-def validate_dob(value):
-    if value > date.today():
-        raise ValidationError("Date of birth cannot be in the future.")
+# # DOB
+# def validate_dob(value):
+#     if value > date.today():
+#         raise ValidationError("Date of birth cannot be in the future.")
 
-# Joining Date
-def validate_joining_date(value):
-    if value > date.today():
-        raise ValidationError("Joining date cannot be in the future.")
+# # Joining Date
+# def validate_joining_date(value):
+#     if value > date.today():
+#         raise ValidationError("Joining date cannot be in the future.")

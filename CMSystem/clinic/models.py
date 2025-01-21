@@ -79,7 +79,7 @@ class Patient(models.Model):
     full_name = models.CharField(max_length=100)
     dob = models.DateField()
     gender = models.ForeignKey('Gender', on_delete=models.CASCADE, related_name='patients')
-    mobile_number = models.CharField(max_length=15, unique=True)
+    mobile_number = models.CharField(max_length=15)
     address = models.CharField(max_length=255)
 
     def __str__(self):
