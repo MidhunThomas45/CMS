@@ -1,17 +1,11 @@
 
 from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import viewsets
-from django.http import JsonResponse
-from django.contrib.auth.models import Group
+
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.hashers import check_password
-from .models import Medicine, MedicineType, Receptionist, Staff
-from .serializers import LoginSerializer, MedicineSerializer, MedicineTypeSerializer, ReceptionistSerializer, SignupSerializer
+from .serializers import LoginSerializer, SignupSerializer
 from rest_framework.permissions import AllowAny
 
 # Login

@@ -19,3 +19,5 @@ admin.site.register(Consultation)
 admin.site.register(MedicalRecord)
 admin.site.register(Bill)
 admin.site.register(MedicineType)
+
+admin.site.register(MedicineType)

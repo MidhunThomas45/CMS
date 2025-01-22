@@ -1,14 +1,6 @@
 
-from django.urls import include, path
-from django.views import View
-from .import views
-from .views import AddGroupView, ChangePasswordView, DeleteGroupView, ListGroupsView, LoginView, MedicineTypeViewSet, MedicineViewSet, ReceptionistViewSet, SignupView
-from rest_framework.routers import DefaultRouter
-
-router = DefaultRouter()
-router.register(r'medicines', MedicineViewSet, basename='medicine')
-router.register(r'medicine-types',views.MedicineTypeViewSet)
-router.register(r'receptionists', ReceptionistViewSet, basename='receptionist')
+from django.urls import path
+from .views import LoginView, SignupView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
@@ -20,4 +12,3 @@ urlpatterns = [
     path('staff/change-password/', ChangePasswordView.as_view(), name='staff-change-password'),
 ]
 
-urlpatterns+=router.urls

@@ -2,11 +2,10 @@ import random
 import string
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import update_last_login
+from django.contrib.auth.models import update_last_login, Group
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.models import Group
-from .models import Medicine, MedicineType, Receptionist, Staff
+from .models import Medicine, MedicineType, Receptionist, Staff, Prescription, Salary
 
 
 # Login Serializer
@@ -98,6 +97,21 @@ class SignupSerializer(serializers.ModelSerializer):
         rep['username'] = instance.username
         rep['password'] = getattr(instance, 'generated_password', None)  # Add generated password to response
         return rep 
+
+#precription
+class PrescriptionSerializer(serializers.ModelSerializer):
+    
+    #Patient = PatientSerializer(source = "PatientId", read_only = True)
+    #Medicine = MedicineSerializer(source = "MedicineId", many = True, read_only = True)
+    class Meta:
+        model = Prescription
+        fields = '__all__'
+
+#Salary
+class SalarySerilaizer(serializers.ModelSerializer):
+    class Meta:
+        model = Salary
+        fields = '__all__'
 
 class MedicineSerializer(serializers.ModelSerializer):
     class Meta:
