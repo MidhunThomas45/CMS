@@ -1,7 +1,52 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    DoctorViewSet,
+    LoginView,
+    SignupView,
+    PatientViewSet,
+    AppointmentViewSet,
+    SpecializationViewSet,
+    StaffViewSet,
+    ScheduleViewSet,
+    TimeSlotViewSet,
+    TokenViewSet,
+    ConsultationViewSet,
+    MedicalRecordViewSet,
+    BillViewSet,
+    PrescriptionViewSet,
+    SalaryViewSet,
+    MedicineViewSet,
+    MedicineTypeViewSet,
+    ReceptionistViewSet,
+    AddGroupView,
+    ListGroupsView,
+    DeleteGroupView,
+    ChangePasswordView,
+)
 
-from django.urls import path
-from .views import LoginView, SignupView
+# Create a router object
+router = DefaultRouter()
 
+# Register viewsets with the router
+router.register(r'staff', StaffViewSet)
+router.register(r'patients', PatientViewSet)
+router.register(r'appointments', AppointmentViewSet)
+router.register(r'specializations', SpecializationViewSet)
+router.register(r'doctors', DoctorViewSet)
+router.register(r'schedules', ScheduleViewSet)
+router.register(r'time-slots', TimeSlotViewSet)
+router.register(r'tokens', TokenViewSet)
+router.register(r'consultations', ConsultationViewSet)
+router.register(r'medical-records', MedicalRecordViewSet)
+router.register(r'bills', BillViewSet)
+router.register(r'prescriptions', PrescriptionViewSet)
+router.register(r'salary', SalaryViewSet)
+router.register(r'medicines', MedicineViewSet, basename='medicine')
+router.register(r'medicine-types', MedicineTypeViewSet)
+router.register(r'receptionists', ReceptionistViewSet, basename='receptionist')
+
+# Define urlpatterns
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('signup/', SignupView.as_view(), name='signup'),
@@ -12,3 +57,4 @@ urlpatterns = [
     path('staff/change-password/', ChangePasswordView.as_view(), name='staff-change-password'),
 ]
 
+urlpatterns+=router.urls

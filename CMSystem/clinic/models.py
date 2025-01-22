@@ -1,39 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# Department Table
 class Department(models.Model):
     department_name = models.CharField(max_length=50)
-    
-
-    def __str__(self):
-        return self.department_name
-
-
-class Salary(models.Model):
-    staff = models.ForeignKey('Staff', on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
     base_salary = models.DecimalField(max_digits=10, decimal_places=2)
-    deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    total_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    payment_status = models.BooleanField(default=False)
-    salary_payment_date = models.DateField()
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        # Calculate total salary automatically before saving
-        self.total_salary = self.base_salary + self.increment - self.deductions
-        super(Salary, self).save(*args, **kwargs)  # Call the "real" save() method
-
-    def __str__(self):
-        return f"{self.staff}"
-
     
+    def _str_(self):
+        return self.department_name
+   
 
 # Gender Model
 class Gender(models.Model):
     name = models.CharField(max_length=10, unique=True)  # Example: 'Male', 'Female', 'Other'
-
     def __str__(self):
         return self.name
 
@@ -49,6 +27,28 @@ class Staff(AbstractUser):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class Salary(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
+    base_salary = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='staff')
+    deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    total_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    payment_status = models.BooleanField(default=False)
+    salary_payment_date = models.DateField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Calculate total salary automatically before saving
+        self.total_salary = self.base_salary + self.increment - self.deductions
+        super(Salary, self).save(*args, **kwargs)  # Call the "real" save() method
+
+    def get_base_salary(self):
+        return self.department.base_salary
+
+    def _str_(self):
+        return f"{self.staff}"
+
     
 # Specialization Table
 class Specialization(models.Model):
@@ -161,4 +161,3 @@ class Bill(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
