@@ -3,34 +3,34 @@ from django.contrib.auth.models import AbstractUser
 
 class Department(models.Model):
     department_name = models.CharField(max_length=50)
-    base_salary = models.DecimalField(max_digits=10, decimal_places=2)
-    
-    def _str_(self):
+    base_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+
+    def __str__(self):
         return self.department_name
-   
 
 # Gender Model
 class Gender(models.Model):
     name = models.CharField(max_length=10, unique=True)  # Example: 'Male', 'Female', 'Other'
+
     def __str__(self):
         return self.name
 
 # Staff Model
 class Staff(AbstractUser):
-    gender = models.ForeignKey('Gender', on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_gender')
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_gender')
     dob = models.DateField(null=True, blank=True)
     mobile_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
-    joining_date = models.DateField(null=True, blank=True)
+    joining_date = models.DateTimeField(null=True, blank=True)
     qualification = models.CharField(max_length=100, null=True, blank=True)
     photo = models.ImageField(upload_to='staff_photos/', null=True, blank=True) 
-    department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='staff_department', null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='staff_department', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 class Salary(models.Model):
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
-    base_salary = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='staff')
+    # department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='staff', null=True, blank=True)
     deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     total_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -38,17 +38,41 @@ class Salary(models.Model):
     salary_payment_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        # Calculate total salary automatically before saving
-        self.total_salary = self.base_salary + self.increment - self.deductions
-        super(Salary, self).save(*args, **kwargs)  # Call the "real" save() method
+    # def save(self, *args, **kwargs):
+    #     # Calculate total salary automatically before saving
+    #     if self.staff and self.department:
+    #         self.base_salary = self.department.base_salary  # Corrected to use department reference
+    #     self.total_salary = self.base_salary + self.increment - self.deductions
+    #     super(Salary, self).save(*args, **kwargs)
 
-    def get_base_salary(self):
-        return self.department.base_salary
+    # def get_base_salary(self):
+    #     return self.department.base_salary if self.department else 0.0
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.staff}"
 
+# class Salary(models.Model):
+#     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
+#     base_salary = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='staff')
+#     deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+#     increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+#     total_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+#     payment_status = models.BooleanField(default=False)
+#     salary_payment_date = models.DateField()
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def save(self, *args, **kwargs):
+#         # Calculate total salary automatically before saving
+#         if self.staff and self.staff.department:
+#             self.base_salary = self.staff.department.base_salary  # Corrected here
+#         self.total_salary = self.base_salary + self.increment - self.deductions
+#         super(Salary, self).save(*args, **kwargs)
+
+#     def get_base_salary(self):
+#         return self.base_salary.salary
+
+#     def __str__(self):
+#         return f"{self.staff}"
     
 # Specialization Table
 class Specialization(models.Model):
@@ -60,7 +84,7 @@ class Specialization(models.Model):
 # Doctor Table
 class Doctor(models.Model):
     staff = models.OneToOneField(Staff, on_delete=models.CASCADE, related_name='doctor')
-    specialization = models.ForeignKey('Specialization', on_delete=models.CASCADE, related_name='doctors')
+    specialization = models.ForeignKey(Specialization, on_delete=models.CASCADE, related_name='doctors')
     consultation_fee = models.DecimalField(max_digits=10, decimal_places=2)
     year_of_experience = models.IntegerField()
 
@@ -88,7 +112,7 @@ class Schedule(models.Model):
 class Patient(models.Model):
     full_name = models.CharField(max_length=100)
     dob = models.DateField()
-    gender = models.ForeignKey('Gender', on_delete=models.CASCADE, related_name='patients')
+    gender = models.ForeignKey(Gender, on_delete=models.CASCADE, related_name='patients')
     mobile_number = models.CharField(max_length=15)
     address = models.CharField(max_length=255)
 
@@ -97,7 +121,7 @@ class Patient(models.Model):
 
 # Appointment Table
 class Appointment(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments_patient')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='appointments')
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='schedules', null=True, blank=True)
     appointment_date = models.DateField()

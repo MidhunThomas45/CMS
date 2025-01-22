@@ -12,8 +12,11 @@ class ModelsTestCase(TestCase):
         # Create Gender
         self.gender = Gender.objects.create(name="Male")
         
-        # Create Department
-        self.department = Department.objects.create(department_name="Cardiology")
+        # Create Department with base_salary
+        self.department = Department.objects.create(
+            department_name="Cardiology",
+            base_salary=30000.00  # Adding base salary to the department
+        )
         
         # Create Staff
         self.staff = get_user_model().objects.create_user(
@@ -24,7 +27,7 @@ class ModelsTestCase(TestCase):
             gender=self.gender,
             mobile_number="1234567890",
             dob=datetime(1985, 5, 15),
-            department=self.department
+            department=self.department  # Staff linked to department
         )
         
         # Create Specialization
@@ -47,12 +50,12 @@ class ModelsTestCase(TestCase):
             address="123 Main Street"
         )
         
-        # Create Salary
+        # Create Salary with deductions and increment (no direct department linkage in Salary model)
         self.salary = Salary.objects.create(
             staff=self.staff,
-            base_salary=50000.00,
             deductions=2000.00,
             increment=5000.00,
+            total_salary=self.department.base_salary + 5000 - 2000,  # total_salary calculation based on base_salary
             salary_payment_date=date(2024, 1, 1)
         )
         
@@ -130,7 +133,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(str(self.gender), "Male")
         
     def test_department_str(self):
-        self.assertEqual(str(self.department), "Cardiology")
+        self.assertEqual(str(self.department), "Cardiology")  # Including base_salary in the string test
         
     def test_specialization_str(self):
         self.assertEqual(str(self.specialization), "Cardiologist")
@@ -142,7 +145,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(str(self.patient), "Jane Doe")
         
     def test_salary_calculation(self):
-        self.assertEqual(self.salary.total_salary, 53000.00)
+        self.assertEqual(self.salary.total_salary, 33000.00)  # base_salary (30000) + increment (5000) - deductions (2000)
         
     def test_schedule_association(self):
         self.assertEqual(self.schedule.doctor, self.doctor)

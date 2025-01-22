@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login, Group
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import (Medicine, MedicineType, Receptionist, Staff, Prescription, 
+from .models import (Department, Gender, Medicine, MedicineType, Receptionist, Staff, Prescription, 
                      Salary, Patient, Appointment, Specialization, Doctor, 
                      Schedule, TimeSlot, Token, Consultation, MedicalRecord, Bill)
 from .validators import validate_mobile_number
@@ -215,3 +215,17 @@ class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
         fields = ['id', 'appointment', 'total_amount', 'payment_status', 'created_at']
+
+#gender
+
+class GenderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gender
+        fields = ['id', 'name']  # Include all the fields you want to expose
+
+#dep
+#Department
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ['id', 'department_name', 'base_salary']  # Include all the fields you want to expose

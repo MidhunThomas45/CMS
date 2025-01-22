@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.hashers import check_password
 
 from .models import (
-    MedicineType, Prescription, Receptionist, Salary, Medicine, Staff, 
+    Department, Gender, MedicineType, Prescription, Receptionist, Salary, Medicine, Staff, 
     Patient, Appointment, Specialization, Doctor, Schedule, TimeSlot, 
     Token, Consultation, MedicalRecord, Bill
 )
@@ -17,8 +17,8 @@ from .serializers import (
     AppointmentSerializer, SpecializationSerializer, DoctorSerializer, 
     ScheduleSerializer, TimeSlotSerializer, TokenSerializer, 
     ConsultationSerializer, MedicalRecordSerializer, BillSerializer, 
-    PrescriptionSerializer, MedicineSerializer, SalarySerilaizer, 
-    MedicineTypeSerializer, ReceptionistSerializer
+    PrescriptionSerializer, MedicineSerializer, SalarySerializer, 
+    MedicineTypeSerializer, ReceptionistSerializer, GenderSerializer, DepartmentSerializer
 )
 
 # Login
@@ -138,8 +138,8 @@ class BillViewSet(viewsets.ModelViewSet):
 class PrescriptionViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Medicine.objects.all()
-    serializer_class = MedicineSerializer
+    queryset = Prescription.objects.all()
+    serializer_class = PrescriptionSerializer
 
 
 # Salary
@@ -147,7 +147,7 @@ class SalaryViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Salary.objects.all()
-    serializer_class = SalarySerilaizer
+    serializer_class = SalarySerializer
 
 
 # Group Management
@@ -224,3 +224,18 @@ class MedicineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Medicine.objects.all()
     serializer_class = MedicineSerializer
+
+#gender
+class GenderViewSet(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]  # Authenticate using JWT
+    permission_classes = [IsAuthenticated]  # Only allow authenticated users
+    queryset = Gender.objects.all()  # Fetch all genders
+    serializer_class = GenderSerializer  # Use the GenderSerializer
+
+#dep
+#Department
+class DepartmentViewSet(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]  # Authenticate using JWT
+    permission_classes = [IsAuthenticated]  # Only allow authenticated users
+    queryset = Department.objects.all()  # Fetch all departments
+    serializer_class = DepartmentSerializer  # Use the DepartmentSerializer

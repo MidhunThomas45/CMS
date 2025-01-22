@@ -1,24 +1,9 @@
+from .import views
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    DoctorViewSet,
     LoginView,
     SignupView,
-    PatientViewSet,
-    AppointmentViewSet,
-    SpecializationViewSet,
-    StaffViewSet,
-    ScheduleViewSet,
-    TimeSlotViewSet,
-    TokenViewSet,
-    ConsultationViewSet,
-    MedicalRecordViewSet,
-    BillViewSet,
-    PrescriptionViewSet,
-    SalaryViewSet,
-    MedicineViewSet,
-    MedicineTypeViewSet,
-    ReceptionistViewSet,
     AddGroupView,
     ListGroupsView,
     DeleteGroupView,
@@ -29,22 +14,24 @@ from .views import (
 router = DefaultRouter()
 
 # Register viewsets with the router
-router.register(r'staff', StaffViewSet)
-router.register(r'patients', PatientViewSet)
-router.register(r'appointments', AppointmentViewSet)
-router.register(r'specializations', SpecializationViewSet)
-router.register(r'doctors', DoctorViewSet)
-router.register(r'schedules', ScheduleViewSet)
-router.register(r'time-slots', TimeSlotViewSet)
-router.register(r'tokens', TokenViewSet)
-router.register(r'consultations', ConsultationViewSet)
-router.register(r'medical-records', MedicalRecordViewSet)
-router.register(r'bills', BillViewSet)
-router.register(r'prescriptions', PrescriptionViewSet)
-router.register(r'salary', SalaryViewSet)
-router.register(r'medicines', MedicineViewSet, basename='medicine')
-router.register(r'medicine-types', MedicineTypeViewSet)
-router.register(r'receptionists', ReceptionistViewSet, basename='receptionist')
+router.register(r'staff', views.StaffViewSet)
+router.register(r'patients', views.PatientViewSet)
+router.register(r'appointments', views.AppointmentViewSet)
+router.register(r'specializations', views.SpecializationViewSet)
+router.register(r'doctors', views.DoctorViewSet)
+router.register(r'schedules', views.ScheduleViewSet)
+router.register(r'time-slots', views.TimeSlotViewSet)
+router.register(r'tokens', views.TokenViewSet)
+router.register(r'consultations', views.ConsultationViewSet)
+router.register(r'medical-records', views.MedicalRecordViewSet)
+router.register(r'bills', views.BillViewSet)
+router.register(r'prescriptions', views.PrescriptionViewSet)
+router.register(r'salary', views.SalaryViewSet)
+router.register(r'medicines', views.MedicineViewSet, basename='medicine')
+router.register(r'medicine-types', views.MedicineTypeViewSet)
+router.register(r'receptionists', views.ReceptionistViewSet, basename='receptionist')
+router.register(r'genders', views.GenderViewSet, basename='gender')
+router.register(r'departments', views.DepartmentViewSet, basename='department')
 
 # Define urlpatterns
 urlpatterns = [
