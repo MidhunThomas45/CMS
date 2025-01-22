@@ -4,21 +4,31 @@ from django.contrib.auth.models import AbstractUser
 # Department Table
 class Department(models.Model):
     department_name = models.CharField(max_length=50)
-    base_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    
 
     def __str__(self):
         return self.department_name
-    
-# Salary Table
+
+
 class Salary(models.Model):
     staff = models.ForeignKey('Staff', on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
     base_salary = models.DecimalField(max_digits=10, decimal_places=2)
     deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    total_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    total_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     payment_status = models.BooleanField(default=False)
     salary_payment_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Calculate total salary automatically before saving
+        self.total_salary = self.base_salary + self.increment - self.deductions
+        super(Salary, self).save(*args, **kwargs)  # Call the "real" save() method
+
+    def __str__(self):
+        return f"{self.staff}"
+
+    
 
 # Gender Model
 class Gender(models.Model):
@@ -30,7 +40,7 @@ class Gender(models.Model):
 # Staff Model
 class Staff(AbstractUser):
     gender = models.ForeignKey('Gender', on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_gender')
-    dob = models.DateTimeField(null=True, blank=True)
+    dob = models.DateField(null=True, blank=True)
     mobile_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
     joining_date = models.DateField(null=True, blank=True)
     qualification = models.CharField(max_length=100, null=True, blank=True)
@@ -79,7 +89,7 @@ class Patient(models.Model):
     full_name = models.CharField(max_length=100)
     dob = models.DateField()
     gender = models.ForeignKey('Gender', on_delete=models.CASCADE, related_name='patients')
-    mobile_number = models.CharField(max_length=15, unique=True)
+    mobile_number = models.CharField(max_length=15)
     address = models.CharField(max_length=255)
 
     def __str__(self):
@@ -89,6 +99,7 @@ class Patient(models.Model):
 class Appointment(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='appointments')
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='schedules', null=True, blank=True)
     appointment_date = models.DateField()
     is_pre_booked = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

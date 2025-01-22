@@ -1,12 +1,11 @@
 from django.shortcuts import render
-
-# Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .serializers import LoginSerializer, SignupSerializer
-from rest_framework.permissions import AllowAny
-
+from rest_framework import status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from .models import Prescription, Salary
+from .serializers import LoginSerializer, SalarySerilaizer, SignupSerializer, PrescriptionSerializer
 # Login
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -30,4 +29,18 @@ class SignupView(APIView):
                 "user": SignupSerializer(user).data
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#Precription
+class PrescriptionViewSet(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]  # Authenticate using JWT
+    permission_classes = [IsAuthenticated]  # Only allow authenticated users
+    queryset = Prescription.objects.all()
+    serializer_class = PrescriptionSerializer
+
+class SalaryViewSet(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]  # Authenticate using JWT
+    permission_classes = [IsAuthenticated]  # Only allow authenticated users
+    queryset = Salary.objects.all()
+    serializer_class =SalarySerilaizer
+
 
