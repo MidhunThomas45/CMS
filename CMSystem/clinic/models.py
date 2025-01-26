@@ -29,27 +29,34 @@ class Staff(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Salary(models.Model):
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
-    # department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='staff', null=True, blank=True)
-    deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    increment = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    total_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    staff = models.ForeignKey(
+        Staff, on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True
+    )
+    base_salary = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True
+    )
+    deductions = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0
+    )
+    increment = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0
+    )
+    total_salary = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
     payment_status = models.BooleanField(default=False)
     salary_payment_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
 
-    # def save(self, *args, **kwargs):
-    #     # Calculate total salary automatically before saving
-    #     if self.staff and self.department:
-    #         self.base_salary = self.department.base_salary  # Corrected to use department reference
-    #     self.total_salary = self.base_salary + self.increment - self.deductions
-    #     super(Salary, self).save(*args, **kwargs)
-
-    # def get_base_salary(self):
-    #     return self.department.base_salary if self.department else 0.0
+    def save(self, *args, **kwargs):
+        if self.base_salary is not None:
+            self.total_salary = self.base_salary + self.increment - self.deductions
+        else:
+            self.total_salary = None
+        super(Salary, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.staff}"
+        return f"{self.staff.first_name if self.staff else 'Staff'}"
 
 # class Salary(models.Model):
 #     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_salary', null=True, blank=True)
@@ -96,9 +103,18 @@ class Receptionist(models.Model):
     staff = models.OneToOneField(Staff, on_delete=models.CASCADE, related_name='receptionist')
     year_of_experience = models.IntegerField()
 
+    def __str__(self):
+        return f"{self.staff.first_name}"
+
+
 class TimeSlot(models.Model):
+    type = models.CharField(max_length=15, null=True, blank=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
+
+    def __str__(self):
+        return f"{self.type}"
+
 
 # Schedule Table
 class Schedule(models.Model):
@@ -107,6 +123,9 @@ class Schedule(models.Model):
     time_slot = models.ManyToManyField(TimeSlot, related_name="schedules")
     token = models.IntegerField()
     status = models.BooleanField(default=True)
+    def __str__(self):
+        return f"{self.doctor.staff.first_name}-{self.time_slot}"
+
 
 # Patient Table
 class Patient(models.Model):
@@ -128,12 +147,19 @@ class Appointment(models.Model):
     is_pre_booked = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return f"{self.patient.full_name}"
+
 # Token Table
 class Token(models.Model):
     appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='tokens')
     token_number = models.IntegerField()
     issued_at = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.appointment.patient.full_name}"
+
 
 # Medicine Type
 class MedicineType(models.Model):
@@ -154,10 +180,13 @@ class Medicine(models.Model):
 # Prescription Table
 class Prescription(models.Model):
     medicines = models.ManyToManyField(Medicine, related_name='prescriptions')
-    dosage = models.IntegerField()
-    frequency = models.IntegerField()
-    duration = models.IntegerField()
+    dosage = models.CharField(max_length=100)
+    frequency = models.CharField(max_length=100)
+    duration = models.CharField(max_length=100)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='prescriptions')
+
+    def __str__(self):
+        return f"{self.patient.full_name}"
 
 # Consultation Table
 class Consultation(models.Model):
@@ -171,6 +200,9 @@ class Consultation(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='consultations')
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return f"{self.patient.full_name}"
+
 # Medical Record Table
 class MedicalRecord(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='medical_records')
@@ -178,6 +210,9 @@ class MedicalRecord(models.Model):
     record_date = models.DateField()
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='medical_records')
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.full_name}"
 
 # Bill Table
 class Bill(models.Model):
